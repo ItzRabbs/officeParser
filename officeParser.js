@@ -40,6 +40,15 @@ async function scanForTextWord(result) {
 }
 
 var parseWord = async function (filename, callback, deleteOfficeDist = true) {
+    if (typeof callback !== 'function') {
+        return new Promise(function (resolve, reject) {
+            parseWord(filename, function (err, data) {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        });
+    }
+
     try {
         if (validateFileExtension(filename, ["docx"])) {
             decompress(filename, decompressLocation).then(files => {
@@ -119,6 +128,15 @@ async function scanForTextPowerPoint(result) {
 
 
 var parsePowerPoint = function (filename, callback, deleteOfficeDist = true) {
+    if (typeof callback !== 'function') {
+        return new Promise(function (resolve, reject) {
+            parsePowerPoint(filename, function (err, data) {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        });
+    }
+
     try {
         if (validateFileExtension(filename, ["pptx"])) {
             decompress(filename, decompressLocation).then(async files => {
@@ -272,6 +290,15 @@ async function scanForTextExcelWorkSheet(result) {
 }
 
 var parseExcel = function (filename, callback, deleteOfficeDist = true) {
+    if (typeof callback !== 'function') {
+        return new Promise(function (resolve, reject) {
+            parseExcel(filename, function (err, data) {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        });
+    }
+
     try {
         if (validateFileExtension(filename, ["xlsx"])) {
             decompress(filename, decompressLocation).then(async files => {
@@ -364,6 +391,15 @@ async function scanForTextOpenOffice(result) {
 }
 
 var parseOpenOffice = async function (filename, callback, deleteOfficeDist = true) {
+    if (typeof callback !== 'function') {
+        return new Promise(function (resolve, reject) {
+            parseOpenOffice(filename, function (err, data) {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        });
+    }
+
     try {
         if (validateFileExtension(filename, ["odt", "odp", "ods"])) {
             decompress(filename, decompressLocation).then(files => {
@@ -421,6 +457,15 @@ function validateFileExtension(filename, extension) {
 // #region parse office
 
 function parseOffice(filename, callback, deleteOfficeDist = true) {
+    if (typeof callback !== 'function') {
+        return new Promise(function (resolve, reject) {
+            parseOffice(filename, function (err, data) {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        });
+    }
+
     var extension = filename.split(".").pop().toLowerCase();
 
     if (extension == "docx") {
