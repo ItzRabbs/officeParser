@@ -127,7 +127,7 @@ async function scanForTextPowerPoint(result) {
 }
 
 
-var parsePowerPoint = function (filename, callback, deleteOfficeDist = true) {
+var parsePowerPoint = async function (filename, callback, deleteOfficeDist = true) {
     if (typeof callback !== 'function') {
         return new Promise(function (resolve, reject) {
             parsePowerPoint(filename, function (err, data) {
@@ -139,7 +139,7 @@ var parsePowerPoint = function (filename, callback, deleteOfficeDist = true) {
 
     try {
         if (validateFileExtension(filename, ["pptx"])) {
-            decompress(filename, decompressLocation).then(async files => {
+            decompress(filename, decompressLocation).then(files => {
                 myTextPowerPoint = [];
 
                 if (fs.existsSync(decompressLocation + '/ppt/slides')) {
@@ -147,21 +147,25 @@ var parsePowerPoint = function (filename, callback, deleteOfficeDist = true) {
 
 
                     for (var i = 0; i < slidesNum - 1; i++) {
-                        var parser = new xml2js.Parser();
+                        if (fs.existsSync(`${decompressLocation}/ppt/slides/slide${i + 1}.xml`)) {
+                            var parser = new xml2js.Parser();
 
-                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/slides/slide${i + 1}.xml`, 'utf8');
-                        var result = await util.promisify(parser.parseString.bind(parser))(myData);
-                        await scanForTextPowerPoint(result);
+                            var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/slides/slide${i + 1}.xml`, 'utf8');
+                            var result = await util.promisify(parser.parseString.bind(parser))(myData);
+                            await scanForTextPowerPoint(result);
+                        }
                     }
 
                     if (fs.existsSync(decompressLocation + '/ppt/notesSlides')) {
                         var notesSlidesNum = await fs.readdirSync(decompressLocation + '/ppt/notesSlides').length;
                         for (var i = 0; i < notesSlidesNum - 1; i++) {
-                            var parser = new xml2js.Parser();
+                            if (fs.existsSync(`${decompressLocation}/ppt/notesSlides/notesSlide${i + 1}.xml`)) {
+                                var parser = new xml2js.Parser();
 
-                            var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/notesSlides/notesSlide${i + 1}.xml`, 'utf8');
-                            var result = await util.promisify(parser.parseString.bind(parser))(myData);
-                            await scanForTextPowerPoint(result);
+                                var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/notesSlides/notesSlide${i + 1}.xml`, 'utf8');
+                                var result = await util.promisify(parser.parseString.bind(parser))(myData);
+                                await scanForTextPowerPoint(result);
+                            }
                         }
                     }
 
@@ -310,17 +314,21 @@ var parseExcel = function (filename, callback, deleteOfficeDist = true) {
                     for (var i = 0; i < workSheetsNum - 1; i++) {
                         var parser = new xml2js.Parser();
 
-                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/worksheets/sheet${i + 1}.xml`, 'utf8');
-                        var result = await util.promisify(parser.parseString.bind(parser))(myData);
-                        await scanForTextExcelWorkSheet(result);
+                        if (fs.existsSync(`${decompressLocation}/xl/worksheets/sheet${i + 1}.xml`)) {
+                            var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/worksheets/sheet${i + 1}.xml`, 'utf8');
+                            var result = await util.promisify(parser.parseString.bind(parser))(myData);
+                            await scanForTextExcelWorkSheet(result);
+                        }
                     }
 
                     if (fs.existsSync(decompressLocation + '/xl/sharedStrings.xml')) {
                         var parser = new xml2js.Parser();
 
-                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/sharedStrings.xml`, 'utf8');
-                        var result = await util.promisify(parser.parseString.bind(parser))(myData);
-                        await scanForTextExcelSharedStrings(result);
+                        if (fs.existsSync(`${decompressLocation}/xl/sharedStrings.xml`)) {
+                            var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/sharedStrings.xml`, 'utf8');
+                            var result = await util.promisify(parser.parseString.bind(parser))(myData);
+                            await scanForTextExcelSharedStrings(result);
+                        }
                     }
 
                     if (fs.existsSync(decompressLocation + '/xl/drawings')) {
@@ -329,9 +337,11 @@ var parseExcel = function (filename, callback, deleteOfficeDist = true) {
                         for (var i = 0; i < drawingsNum; i++) {
                             var parser = new xml2js.Parser();
 
-                            var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/drawings/drawing${i + 1}.xml`, 'utf8');
-                            var result = await util.promisify(parser.parseString.bind(parser))(myData);
-                            await scanForTextExcelDrawing(result);
+                            if (fs.existsSync(`${decompressLocation}/xl/drawings/drawing${i + 1}.xml`)) {
+                                var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/drawings/drawing${i + 1}.xml`, 'utf8');
+                                var result = await util.promisify(parser.parseString.bind(parser))(myData);
+                                await scanForTextExcelDrawing(result);
+                            }
                         }
                     }
 
