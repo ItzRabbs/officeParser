@@ -74,6 +74,8 @@ var parseWord = async function (filename, callback, deleteOfficeDist = true) {
                     });
                 }
                 else {
+                    callback(null, '');
+
                     if (deleteOfficeDist == true) {
                         rimraf(decompressLocation, function () { });
                     }
@@ -176,6 +178,8 @@ var parsePowerPoint = async function (filename, callback, deleteOfficeDist = tru
                     }
                 }
                 else {
+                    callback(null, '');
+
                     if (deleteOfficeDist == true) {
                         rimraf(decompressLocation, function () { });
                     }
@@ -352,6 +356,8 @@ var parseExcel = function (filename, callback, deleteOfficeDist = true) {
                     }
                 }
                 else {
+                    callback(null, '');
+
                     if (deleteOfficeDist == true) {
                         rimraf(decompressLocation, function () { });
                     }
@@ -435,6 +441,8 @@ var parseOpenOffice = async function (filename, callback, deleteOfficeDist = tru
                     });
                 }
                 else {
+                    callback(null, '');
+
                     if (deleteOfficeDist == true) {
                         rimraf(decompressLocation, function () { });
                     }
