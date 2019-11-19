@@ -139,7 +139,7 @@ var parsePowerPoint = async function (filename, callback, deleteOfficeDist = tru
 
     try {
         if (validateFileExtension(filename, ["pptx"])) {
-            decompress(filename, decompressLocation).then(files => {
+            decompress(filename, decompressLocation).then(async files => {
                 myTextPowerPoint = [];
 
                 if (fs.existsSync(decompressLocation + '/ppt/slides')) {
