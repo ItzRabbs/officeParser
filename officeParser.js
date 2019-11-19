@@ -12,7 +12,7 @@ var decompressLocation = "officeDist";
 async function scanForTextWord(result) {
     if (Array.isArray(result)) {
         for (var i = 0; i < result.length; i++) {
-            if (typeof(result[i]) == "string" && result[i] != "") {
+            if (typeof (result[i]) == "string" && result[i] != "") {
                 await myTextWord.push(result[i]);
             }
             else {
@@ -21,47 +21,47 @@ async function scanForTextWord(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
-                if (typeof(result[property]) == "string"){
-                    if ((property == "w:t" || property == "_" ) && result[property] != "") {
+                if (typeof (result[property]) == "string") {
+                    if ((property == "w:t" || property == "_") && result[property] != "") {
                         await myTextWord.push(result[property]);
                     }
                 }
                 else {
                     await scanForTextWord(result[property]);
                 }
-                
+
             }
         }
         return;
     }
 }
 
-var parseWord = async function(filename, callback, deleteOfficeDist = true) {
+var parseWord = async function (filename, callback, deleteOfficeDist = true) {
     if (validateFileExtension(filename, ["docx"])) {
         decompress(filename, decompressLocation).then(files => {
             myTextWord = [];
             if (fs.existsSync(decompressLocation + "/word/document.xml")) {
-                fs.readFile(decompressLocation + '/word/document.xml', 'utf8', function (err,data) {
+                fs.readFile(decompressLocation + '/word/document.xml', 'utf8', function (err, data) {
                     if (err) {
-                       return console.log(err);
-                     }
-                     
-                     xml2js.parseString(data, async function (err, result) {
+                        return console.log(err);
+                    }
+
+                    xml2js.parseString(data, async function (err, result) {
                         await scanForTextWord(result);
-        
+
                         callback(myTextWord.join(" "));
                         if (deleteOfficeDist == true) {
-                            rimraf(decompressLocation, function () {});
+                            rimraf(decompressLocation, function () { });
                         }
-                     });
-                 });
+                    });
+                });
             }
             else {
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
         });
@@ -79,7 +79,7 @@ var myTextPowerPoint = [];
 async function scanForTextPowerPoint(result) {
     if (Array.isArray(result)) {
         for (var i = 0; i < result.length; i++) {
-            if (typeof(result[i]) == "string" && result[i] != "") {
+            if (typeof (result[i]) == "string" && result[i] != "") {
                 await myTextPowerPoint.push(result[i]);
             }
             else {
@@ -88,15 +88,15 @@ async function scanForTextPowerPoint(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
-                if (typeof(result[property]) == "string"){
+                if (typeof (result[property]) == "string") {
                     if ((property == "a:t" || property == "_") && result[property] != "") {
                         await myTextPowerPoint.push(result[property]);
                     }
                 }
-                else if (typeof(result[property][0]) == "string"){
+                else if (typeof (result[property][0]) == "string") {
                     if ((property == "a:t" || property == "_") && result[property] != "") {
                         await myTextPowerPoint.push(result[property]);
                     }
@@ -111,48 +111,48 @@ async function scanForTextPowerPoint(result) {
 }
 
 
-var parsePowerPoint = function(filename, callback, deleteOfficeDist = true) {
+var parsePowerPoint = function (filename, callback, deleteOfficeDist = true) {
     if (validateFileExtension(filename, ["pptx"])) {
         decompress(filename, decompressLocation).then(async files => {
             myTextPowerPoint = [];
 
             if (fs.existsSync(decompressLocation + '/ppt/slides')) {
                 var slidesNum = await fs.readdirSync(decompressLocation + '/ppt/slides').length;
-                
 
-                for (var i=0; i<slidesNum-1; i++) {
+
+                for (var i = 0; i < slidesNum - 1; i++) {
                     var parser = new xml2js.Parser();
 
-                    var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/slides/slide${i+1}.xml`, 'utf8');
+                    var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/slides/slide${i + 1}.xml`, 'utf8');
                     var result = await util.promisify(parser.parseString.bind(parser))(myData);
                     await scanForTextPowerPoint(result);
                 }
 
                 if (fs.existsSync(decompressLocation + '/ppt/notesSlides')) {
                     var notesSlidesNum = await fs.readdirSync(decompressLocation + '/ppt/notesSlides').length;
-                    for (var i=0; i<notesSlidesNum-1; i++) {
+                    for (var i = 0; i < notesSlidesNum - 1; i++) {
                         var parser = new xml2js.Parser();
-    
-                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/notesSlides/notesSlide${i+1}.xml`, 'utf8');
+
+                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/ppt/notesSlides/notesSlide${i + 1}.xml`, 'utf8');
                         var result = await util.promisify(parser.parseString.bind(parser))(myData);
                         await scanForTextPowerPoint(result);
                     }
                 }
-                
+
                 callback(myTextPowerPoint.join(" "));
-                    
+
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
             else {
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
         });
     }
-} 
+}
 
 // #endregion textFetchFromPowerPoint
 
@@ -164,7 +164,7 @@ var myTextExcel = [];
 async function scanForTextExcelDrawing(result) {
     if (Array.isArray(result)) {
         for (var i = 0; i < result.length; i++) {
-            if (typeof(result[i]) == "string" && result[i] != "") {
+            if (typeof (result[i]) == "string" && result[i] != "") {
                 await myTextExcel.push(result[i]);
             }
             else {
@@ -173,15 +173,15 @@ async function scanForTextExcelDrawing(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
-                if (typeof(result[property]) == "string"){
+                if (typeof (result[property]) == "string") {
                     if ((property == "a:t" || property == "_") && result[property] != "") {
                         await myTextExcel.push(result[property]);
                     }
                 }
-                else if (typeof(result[property][0]) == "string"){
+                else if (typeof (result[property][0]) == "string") {
                     if ((property == "a:t" || property == "_") && result[property] != "") {
                         await myTextExcel.push(result[property]);
                     }
@@ -199,7 +199,7 @@ async function scanForTextExcelDrawing(result) {
 async function scanForTextExcelSharedStrings(result) {
     if (Array.isArray(result)) {
         for (var i = 0; i < result.length; i++) {
-            if (typeof(result[i]) == "string" && result[i] != "") {
+            if (typeof (result[i]) == "string" && result[i] != "") {
                 await myTextExcel.push(result[i]);
             }
             else {
@@ -208,15 +208,15 @@ async function scanForTextExcelSharedStrings(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
-                if (typeof(result[property]) == "string"){
+                if (typeof (result[property]) == "string") {
                     if ((property == "t" || property == "_") && result[property] != "") {
                         await myTextExcel.push(result[property]);
                     }
                 }
-                else if (typeof(result[property][0]) == "string"){
+                else if (typeof (result[property][0]) == "string") {
                     if ((property == "t" || property == "_") && result[property] != "") {
                         await myTextExcel.push(result[property]);
                     }
@@ -244,7 +244,7 @@ async function scanForTextExcelWorkSheet(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
                 if (result[property]["v"]) {
@@ -261,7 +261,7 @@ async function scanForTextExcelWorkSheet(result) {
     }
 }
 
-var parseExcel = function(filename, callback, deleteOfficeDist = true) {
+var parseExcel = function (filename, callback, deleteOfficeDist = true) {
     if (validateFileExtension(filename, ["xlsx"])) {
         decompress(filename, decompressLocation).then(async files => {
             myTextExcel = [];
@@ -269,10 +269,10 @@ var parseExcel = function(filename, callback, deleteOfficeDist = true) {
 
             if (fs.existsSync(decompressLocation + '/xl/worksheets')) {
                 var workSheetsNum = await fs.readdirSync(decompressLocation + '/xl/worksheets').length;
-                for (var i=0; i<workSheetsNum-1; i++) {
+                for (var i = 0; i < workSheetsNum - 1; i++) {
                     var parser = new xml2js.Parser();
 
-                    var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/worksheets/sheet${i+1}.xml`, 'utf8');
+                    var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/worksheets/sheet${i + 1}.xml`, 'utf8');
                     var result = await util.promisify(parser.parseString.bind(parser))(myData);
                     await scanForTextExcelWorkSheet(result);
                 }
@@ -284,33 +284,33 @@ var parseExcel = function(filename, callback, deleteOfficeDist = true) {
                     var result = await util.promisify(parser.parseString.bind(parser))(myData);
                     await scanForTextExcelSharedStrings(result);
                 }
-            
+
                 if (fs.existsSync(decompressLocation + '/xl/drawings')) {
                     var drawingsNum = await fs.readdirSync(decompressLocation + '/xl/drawings').length;
 
-                    for (var i=0; i<drawingsNum; i++) {
+                    for (var i = 0; i < drawingsNum; i++) {
                         var parser = new xml2js.Parser();
 
-                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/drawings/drawing${i+1}.xml`, 'utf8');
+                        var myData = await util.promisify(fs.readFile)(`${decompressLocation}/xl/drawings/drawing${i + 1}.xml`, 'utf8');
                         var result = await util.promisify(parser.parseString.bind(parser))(myData);
                         await scanForTextExcelDrawing(result);
                     }
                 }
 
                 callback(myTextExcel.join(" "));
-                
+
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
             else {
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
         });
     }
-} 
+}
 
 // #endregion textFetchFromExcel
 
@@ -323,7 +323,7 @@ var myTextOpenOffice = [];
 async function scanForTextOpenOffice(result) {
     if (Array.isArray(result)) {
         for (var i = 0; i < result.length; i++) {
-            if (typeof(result[i]) == "string" && result[i] != "") {
+            if (typeof (result[i]) == "string" && result[i] != "") {
                 await myTextOpenOffice.push(result[i]);
             }
             else {
@@ -332,10 +332,10 @@ async function scanForTextOpenOffice(result) {
         }
         return;
     }
-    else if(typeof(result) == "object") {
+    else if (typeof (result) == "object") {
         for (var property in result) {
             if (result.hasOwnProperty(property)) {
-                if (typeof(result[property]) == "string"){
+                if (typeof (result[property]) == "string") {
                     if (result[property] != "") {
                         await myTextOpenOffice.push(result[property]);
                     }
@@ -343,36 +343,36 @@ async function scanForTextOpenOffice(result) {
                 else {
                     await scanForTextOpenOffice(result[property]);
                 }
-                
+
             }
         }
         return;
     }
 }
 
-var parseOpenOffice = async function(filename, callback, deleteOfficeDist = true) {
+var parseOpenOffice = async function (filename, callback, deleteOfficeDist = true) {
     if (validateFileExtension(filename, ["odt", "odp", "ods"])) {
         decompress(filename, decompressLocation).then(files => {
             myTextOpenOffice = [];
             if (fs.existsSync(decompressLocation + "/content.xml")) {
-                fs.readFile(decompressLocation + '/content.xml', 'utf8', function (err,data) {
+                fs.readFile(decompressLocation + '/content.xml', 'utf8', function (err, data) {
                     if (err) {
-                       return console.log(err);
-                     }
-                     
-                     xml2js.parseString(data, {"ignoreAttrs": true}, async function (err, result) {
+                        return console.log(err);
+                    }
+
+                    xml2js.parseString(data, { "ignoreAttrs": true }, async function (err, result) {
                         await scanForTextOpenOffice(result);
-        
+
                         callback(myTextOpenOffice.join(" "));
                         if (deleteOfficeDist == true) {
-                            rimraf(decompressLocation, function () {});
+                            rimraf(decompressLocation, function () { });
                         }
-                     });
-                 });
+                    });
+                });
             }
             else {
                 if (deleteOfficeDist == true) {
-                    rimraf(decompressLocation, function () {});
+                    rimraf(decompressLocation, function () { });
                 }
             }
         });
@@ -426,7 +426,7 @@ function parseOffice(filename, callback, deleteOfficeDist = true) {
     else {
         console.log(`Sorry, we currently support docx, pptx, xlsx, odt, odp, ods files only. Create a ticket in Issues on github to add support for ${extension} files. Stay tuned for further updates.`);
     }
-    
+
 }
 
 // #endregion parse office
